@@ -98,12 +98,14 @@ def test_check_port_reports_closed_port():
 
 
 def test_cli_json(monkeypatch, capsys):
-    monkeypatch.setattr("airplay_doctor.cli.local_addresses", lambda: [("eth0", "10.0.0.5")])
+    monkeypatch.setattr("airplay_doctor.cli.interface_names", lambda: ["eth0"])
+    monkeypatch.setattr("airplay_doctor.cli.local_addresses", lambda: ["10.0.0.5"])
     monkeypatch.setattr("airplay_doctor.cli.discover", lambda timeout: [])
     monkeypatch.setattr("airplay_doctor.cli.check_port", lambda host, port, timeout=1.0: False)
     assert main(["--json", "--device", "10.0.0.42"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["interfaces"][0]["name"] == "eth0"
+    assert payload["interfaces"] == ["eth0"]
+    assert payload["addresses"] == ["10.0.0.5"]
     assert len(payload["ports"]) == 3
 
 
@@ -111,6 +113,7 @@ def test_cli_no_mdns_does_not_discover(monkeypatch, capsys):
     def explode(timeout):
         raise AssertionError("mDNS should not run")
 
+    monkeypatch.setattr("airplay_doctor.cli.interface_names", lambda: [])
     monkeypatch.setattr("airplay_doctor.cli.local_addresses", lambda: [])
     monkeypatch.setattr("airplay_doctor.cli.discover", explode)
     assert main(["--no-mdns"]) == 0
@@ -118,6 +121,7 @@ def test_cli_no_mdns_does_not_discover(monkeypatch, capsys):
 
 
 def test_cli_strict_fails_when_no_port_is_open(monkeypatch):
+    monkeypatch.setattr("airplay_doctor.cli.interface_names", lambda: [])
     monkeypatch.setattr("airplay_doctor.cli.local_addresses", lambda: [])
     monkeypatch.setattr("airplay_doctor.cli.discover", lambda timeout: [])
     monkeypatch.setattr("airplay_doctor.cli.check_port", lambda host, port, timeout=1.0: False)
@@ -125,6 +129,7 @@ def test_cli_strict_fails_when_no_port_is_open(monkeypatch):
 
 
 def test_cli_strict_passes_with_one_open_port(monkeypatch):
+    monkeypatch.setattr("airplay_doctor.cli.interface_names", lambda: [])
     monkeypatch.setattr("airplay_doctor.cli.local_addresses", lambda: [])
     monkeypatch.setattr("airplay_doctor.cli.discover", lambda timeout: [])
     monkeypatch.setattr(

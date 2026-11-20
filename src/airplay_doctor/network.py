@@ -163,19 +163,24 @@ def check_port(host: str, port: int, timeout: float = 1.0) -> bool:
         return False
 
 
-def local_addresses() -> List[Tuple[str, str]]:
-    addresses: List[Tuple[str, str]] = []
+def interface_names() -> List[str]:
+    """Interface names, which is enough to tell Wi-Fi from Ethernet."""
     try:
-        for index, name in socket.if_nameindex():
-            addresses.append((name, ""))
+        return [name for _, name in socket.if_nameindex()]
     except OSError:
-        pass
+        return []
+
+
+def local_addresses() -> List[str]:
+    """Non-loopback IPv4 addresses this machine answers on."""
+    addresses: List[str] = []
     try:
-        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
-            address = info[4][0]
-            if address not in ("127.0.0.1",):
-                addresses.append(("host", address))
-                break
+        infos = socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET, socket.SOCK_STREAM)
     except OSError:
-        pass
+        return addresses
+    for info in infos:
+        address = info[4][0]
+        if address.startswith("127.") or address in addresses:
+            continue
+        addresses.append(address)
     return addresses

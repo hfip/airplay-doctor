@@ -7,7 +7,7 @@ import json
 from typing import Iterable, Optional
 
 from . import __version__
-from .network import check_port, devices, discover, local_addresses
+from .network import check_port, devices, discover, interface_names, local_addresses
 
 PORTS = (
     (7000, "airplay"),
@@ -36,7 +36,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def gather(device: Optional[str], timeout: float, use_mdns: bool) -> dict:
     report = {
-        "interfaces": [{"name": name, "address": address} for name, address in local_addresses()],
+        "interfaces": interface_names(),
+        "addresses": local_addresses(),
         "ports": [],
         "devices": [],
     }
@@ -64,15 +65,13 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
         print("interfaces")
-        seen = set()
-        for item in report["interfaces"]:
-            label = item["name"]
-            if label in seen:
-                continue
-            seen.add(label)
-            print("  %-10s %s" % (label, item["address"] or "-"))
-        if not report["interfaces"]:
-            print("  none found")
+        print("  %s" % (", ".join(report["interfaces"]) or "none found"))
+        print("addresses")
+        if report["addresses"]:
+            for address in report["addresses"]:
+                print("  %s" % address)
+        else:
+            print("  no non-loopback IPv4 address")
 
         if args.device:
             print()

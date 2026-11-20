@@ -6,7 +6,9 @@ VLAN, the router filters multicast, or the device is asleep and not answering on
 ```
 $ airplay-doctor --device 10.0.0.42
 interfaces
-  eth0       10.0.0.5
+  lo, en0, utun3
+addresses
+  10.0.0.5
 
 ports on 10.0.0.42
   7000  open    airplay
