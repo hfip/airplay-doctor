@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "airplay-doctor"
+version = "0.1.0"
+description = "Diagnose AirPlay connectivity: interfaces, ports and mDNS."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Abdulluh.X", email = "199844698+hfip@users.noreply.github.com" }]
+keywords = ["airplay", "appletv", "mdns", "bonjour", "diagnostics", "network"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Arabic",
+    "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Linguistic",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.4"]
+
+[project.scripts]
+airplay-doctor = "airplay_doctor.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/hfip/airplay-doctor"
+Issues = "https://github.com/hfip/airplay-doctor/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/airplay_doctor"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
